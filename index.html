@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Personal OS — Momentum</title>
+  <style>
+    :root{
+      --bg: #0b0f14;
+      --panel: rgba(255,255,255,0.06);
+      --panel2: rgba(255,255,255,0.08);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.62);
+      --faint: rgba(255,255,255,0.40);
+      --line: rgba(255,255,255,0.10);
+      --accent: #7dd3fc;   /* calm sky */
+      --good: #86efac;     /* green */
+      --warn: #fde68a;     /* amber */
+      --bad:  #fca5a5;     /* red */
+      --shadow: 0 18px 60px rgba(0,0,0,0.45);
+      --radius: 18px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: var(--sans);
+      background: radial-gradient(900px 500px at 12% 10%, rgba(125,211,252,0.12), transparent 60%),
+                  radial-gradient(900px 500px at 88% 20%, rgba(167,139,250,0.10), transparent 60%),
+                  var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .wrap{
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 28px 18px 80px;
+    }
+
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .title h1{
+      font-size: 18px;
+      letter-spacing: 0.4px;
+      margin: 0;
+      font-weight: 650;
+    }
+    .title p{
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      max-width: 52ch;
+    }
+    .right{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+    }
+    .pill{
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .btn{
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 9px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: transform .08s ease, background .12s ease;
+    }
+    .btn:hover{ background: rgba(255,255,255,0.08); }
+    .btn:active{ transform: translateY(1px); }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 14px;
+      margin-top: 12px;
+    }
+    @media (max-width: 940px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .card h2{
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      margin: 0 0 10px;
+      font-weight: 650;
+    }
+
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 520px){
+      .kpis{ grid-template-columns: 1fr; }
+    }
+    .kpi{
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+    }
+    .kpi .label{
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 8px;
+    }
+    .kpi .value{
+      font-size: 26px;
+      font-weight: 720;
+      letter-spacing: 0.3px;
+      display:flex;
+      align-items:baseline;
+      gap: 8px;
+    }
+    .kpi .value span{
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+    .bar{
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow:hidden;
+      margin-top: 10px;
+    }
+    .bar > i{
+      display:block;
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(125,211,252,0.95), rgba(167,139,250,0.95));
+    }
+
+    .section{
+      margin-top: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+    }
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      cursor:pointer;
+      user-select:none;
+    }
+    .row:hover{
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.08);
+    }
+    .leftRow{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .check{
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.03);
+      display:grid;
+      place-items:center;
+      flex: 0 0 auto;
+    }
+    .check.on{
+      border-color: rgba(134,239,172,0.55);
+      background: rgba(134,239,172,0.10);
+    }
+    .check svg{ opacity: 0; }
+    .check.on svg{ opacity: 1; }
+    .name{
+      font-size: 14px;
+      font-weight: 620;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sub{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .xp{
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      flex: 0 0 auto;
+      padding: 6px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .input{
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,0.25);
+      color: var(--text);
+      outline:none;
+      font-size: 14px;
+    }
+    .input::placeholder{ color: rgba(255,255,255,0.35); }
+
+    .banner{
+      border-radius: 14px;
+      padding: 12px;
+      border: 1px solid rgba(125,211,252,0.28);
+      background: rgba(125,211,252,0.08);
+      color: rgba(255,255,255,0.92);
+      margin-bottom: 12px;
+    }
+    .banner strong{ font-weight: 720; }
+    .banner p{
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .footer{
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      display:flex;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .small{
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .tag{
+      font-family: var(--mono);
+      font-size: 11px;
+      color: rgba(255,255,255,0.65);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Personal OS</h1>
+        <p>Calm execution. Evidence over perfection. If you slip, return quickly.</p>
+      </div>
+      <div class="right">
+        <div class="pill" id="datePill"></div>
+        <button class="btn" id="resetBtn" title="Resets only today's checkboxes (not your metrics history).">Reset today</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Left: Daily -->
+      <div class="card">
+        <h2>Daily</h2>
+
+        <div class="banner" id="comebackBanner" style="display:none;">
+          <strong>COMEBACK AVAILABLE</strong>
+          <p>Yesterday was light. Today: complete 3 Core Missions to earn Comeback XP.</p>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi">
+            <div class="label"><span>Momentum</span><span class="tag" id="momTag">/ 100</span></div>
+            <div class="value"><span id="momentum">82</span><span>steady</span></div>
+            <div class="bar"><i id="momBar"></i></div>
+          </div>
+          <div class="kpi">
+            <div class="label"><span>Self‑Trust</span><span class="tag">/ 100</span></div>
+            <div class="value"><span id="selfTrust">78</span><span>honest</span></div>
+            <div class="bar"><i id="stBar"></i></div>
+          </div>
+          <div class="kpi">
+            <div class="label"><span>Level</span><span class="tag" id="lvlTag"></span></div>
+            <div class="value"><span id="level">Building</span></div>
+            <div class="small">Levels describe consistency — not worth.</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Today’s Main Quest</h2>
+          <input class="input" id="mainQuest" placeholder="One priority that makes today matter." />
+        </div>
+
+        <div class="section">
+          <h2>Core Missions (100 XP base)</h2>
+          <div id="coreList"></div>
+        </div>
+
+        <div class="section">
+          <h2>Bonus Quests</h2>
+          <div id="bonusList"></div>
+        </div>
+
+        <div class="section">
+          <h2>Minimum Viable Day</h2>
+          <div class="row" id="mvdRow">
+            <div class="leftRow">
+              <div class="check" id="mvdCheck"></div>
+              <div style="min-width:0">
+                <div class="name">Minimum Viable Day</div>
+                <div class="sub">Bad day allowed. Disappearing is not.</div>
+              </div>
+            </div>
+            <div class="xp">~35 XP</div>
+          </div>
+          <div class="footer">
+            <div>Daily XP: <span class="tag" id="xpTotal">0</span></div>
+            <div>Core complete: <span class="tag" id="coreCount">0/5</span></div>
+            <div>Comeback XP: <span class="tag" id="comebackXP">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Stoic guidance / quick rules -->
+      <div class="card">
+        <h2>Operating Rules</h2>
+        <p class="small">
+          <strong>1) Momentum &gt; perfection.</strong><br>
+          Your job is to return quickly, not to maintain a flawless run.
+        </p>
+        <p class="small">
+          <strong>2) Promises are sacred.</strong><br>
+          One Main Quest per day. Finish it. Log the evidence. Move on.
+        </p>
+        <p class="small">
+          <strong>3) Digital discipline is intentionality.</strong><br>
+          Track wins where you resist autopilot and act on purpose.
+        </p>
+
+        <div class="section">
+          <h2>Today (calm prompt)</h2>
+          <p class="small" id="promptText"></p>
+          <button class="btn" id="newPromptBtn">New prompt</button>
+        </div>
+
+        <div class="section">
+          <h2>Data</h2>
+          <p class="small">
+            This MVP stores data locally in your browser.<br>
+            Next step: connect to Supabase (cloud) or to Notion (as a backend).
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ---------- Config ----------
+  const CORE = [
+    { id: "morningLaunch", name: "Morning Launch", sub: "No socials. Water. Dress. First meaningful action.", xp: 20 },
+    { id: "training",      name: "Movement / Training", sub: "Run or lift. Walk counts on hard days.", xp: 25 },
+    { id: "study",         name: "Deep Academic Work", sub: "Quality session (active recall / practice).", xp: 30 },
+    { id: "prayer",        name: "Prayer / God Connection", sub: "Genuine contact, not a checkbox.", xp: 15 },
+    { id: "eveningReset",  name: "Evening Reset", sub: "5 minutes: review, prepare, close the day.", xp: 10 }
+  ];
+
+  const BONUS = [
+    { id: "reading",    name: "Reading", sub: "10–20 minutes (bonus).", xp: 10 },
+    { id: "connection", name: "Meaningful Connection", sub: "Quality > quantity.", xp: 10 },
+    { id: "courage",    name: "Courageous Action", sub: "Do what matters despite fear.", xp: 15 },
+    { id: "career",     name: "Career Quest", sub: "Small step: research / apply / network.", xp: 10 },
+    { id: "digitalWin", name: "Digital Win", sub: "Resisted autopilot scrolling.", xp: 5 }
+  ];
+
+  const LEVELS = [
+    { name: "Restarting", min: 0 },
+    { name: "Building", min: 60 },
+    { name: "Consistent", min: 70 },
+    { name: "Disciplined", min: 78 },
+    { name: "Reliable", min: 84 },
+    { name: "Resilient", min: 88 },
+    { name: "High Performer", min: 92 },
+    { name: "Self-Mastered", min: 96 }
+  ];
+
+  const PROMPTS = [
+    "What would make you respect yourself more by tonight?",
+    "What are you avoiding because it’s uncomfortable?",
+    "What is the smallest action that proves you can return?",
+    "What does a calm, disciplined day look like — not a perfect one?",
+    "Where can you trade stimulation for meaning (for 15 minutes)?"
+  ];
+
+  // ---------- State ----------
+  const todayKey = () => new Date().toISOString().slice(0,10);
+  const STORAGE_KEY = "personalOS_v1";
+
+  const defaultState = () => ({
+    date: todayKey(),
+    momentum: 82,
+    selfTrust: 78,
+    mainQuest: "",
+    mvd: false,
+    checked: Object.fromEntries([...CORE, ...BONUS].map(x => [x.id, false])),
+    history: {
+      // date -> { xpTotal }
+    },
+    promptIndex: 0
+  });
+
+  function loadState(){
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return defaultState();
+    try{
+      const st = JSON.parse(raw);
+      // new day rollover: keep metrics, reset checkboxes
+      const t = todayKey();
+      if(st.date !== t){
+        // store yesterday xp in history if missing
+        const y = st.date;
+        const { xpTotal } = computeXP(st);
+        st.history = st.history || {};
+        if(y && !st.history[y]) st.history[y] = { xpTotal };
+        // reset for today
+        st.date = t;
+        st.mainQuest = "";
+        st.mvd = false;
+        st.checked = Object.fromEntries([...CORE, ...BONUS].map(x => [x.id, false]));
+      }
+      return st;
+    }catch(e){
+      return defaultState();
+    }
+  }
+
+  function saveState(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  let state = loadState();
+
+  // ---------- UI helpers ----------
+  const el = (id) => document.getElementById(id);
+
+  function formatDatePill(){
+    const d = new Date();
+    const opts = { weekday:"short", month:"short", day:"numeric" };
+    el("datePill").textContent = d.toLocaleDateString(undefined, opts);
+  }
+
+  function levelFromMomentum(m){
+    let lvl = LEVELS[0].name;
+    for(const L of LEVELS){
+      if(m >= L.min) lvl = L.name;
+    }
+    return lvl;
+  }
+
+  function computeXP(st){
+    let coreXP = 0, bonusXP = 0;
+    let coreCount = 0;
+    for(const m of CORE){
+      if(st.checked[m.id]){ coreXP += m.xp; coreCount += 1; }
+    }
+    for(const b of BONUS){
+      if(st.checked[b.id]){ bonusXP += b.xp; }
+    }
+    const xpTotal = coreXP + bonusXP;
+    return { coreXP, bonusXP, xpTotal, coreCount };
+  }
+
+  function computeComeback(st){
+    // Simple comeback rule:
+    // If yesterday xpTotal < 50 and today has >=3 core missions -> +25 XP.
+    const keys = Object.keys(st.history || {}).sort();
+    const yesterday = keys.length ? keys[keys.length - 1] : null;
+    const yXP = yesterday ? st.history[yesterday]?.xpTotal : null;
+    const { coreCount } = computeXP(st);
+    const comebackEligible = (yXP !== null && yXP < 50);
+    const comebackEarned = comebackEligible && coreCount >= 3;
+    return { comebackEligible, comebackEarned, comebackXP: comebackEarned ? 25 : 0, yXP };
+  }
+
+  function updateMetricsFromToday(){
+    // Calm, smooth updates (not harsh):
+    // - Momentum changes modestly with XP, with smaller penalty if MVD is on.
+    // - Self-trust tied to Main Quest presence + some completion.
+    const { xpTotal, coreCount } = computeXP(state);
+    const xpScore = Math.min(xpTotal / 100, 1.2);
+    const coreRatio = coreCount / CORE.length;
+
+    let delta = (xpScore - 0.6) * 10 + (coreRatio - 0.6) * 8;
+    delta = Math.max(-8, Math.min(8, delta));
+    if(state.mvd) delta = Math.max(delta, -2); // MVD reduces downside
+
+    // Smooth momentum
+    state.momentum = clamp(Math.round(state.momentum + delta), 0, 100);
+
+    // Self-trust: if you set a main quest, and you did at least 2 core missions, you gain.
+    const hasQuest = (state.mainQuest || "").trim().length > 0;
+    let stDelta = 0;
+    if(hasQuest && coreCount >= 2) stDelta += 2;
+    if(hasQuest && coreCount >= 4) stDelta += 1;
+    if(!hasQuest && xpTotal >= 60) stDelta += 1; // still credit showing up
+    if(xpTotal < 20 && !state.mvd) stDelta -= 1;
+    state.selfTrust = clamp(Math.round(state.selfTrust + stDelta), 0, 100);
+  }
+
+  function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+  function renderList(containerId, items){
+    const root = el(containerId);
+    root.innerHTML = "";
+    items.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.setAttribute("data-id", item.id);
+      row.innerHTML = `
+        <div class="leftRow">
+          <div class="check" id="chk_${item.id}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+              <path d="M20 6L9 17l-5-5" stroke="rgba(134,239,172,0.95)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div style="min-width:0">
+            <div class="name">${item.name}</div>
+            <div class="sub">${item.sub}</div>
+          </div>
+        </div>
+        <div class="xp">+${item.xp} XP</div>
+      `;
+
+      row.addEventListener("click", () => {
+        state.checked[item.id] = !state.checked[item.id];
+        updateMetricsFromToday();
+        saveState();
+        render();
+      });
+
+      root.appendChild(row);
+    });
+  }
+
+  function render(){
+    formatDatePill();
+
+    // main quest
+    el("mainQuest").value = state.mainQuest;
+
+    // compute XP and comeback
+    const { coreXP, bonusXP, xpTotal, coreCount } = computeXP(state);
+    const cb = computeComeback(state);
+
+    // show comeback banner if eligible and not yet earned
+    el("comebackBanner").style.display = (cb.comebackEligible && !cb.comebackEarned) ? "block" : "none";
+
+    // totals
+    el("xpTotal").textContent = String(xpTotal + cb.comebackXP);
+    el("coreCount").textContent = `${coreCount}/${CORE.length}`;
+    el("comebackXP").textContent = String(cb.comebackXP);
+
+    // KPIs
+    el("momentum").textContent = String(state.momentum);
+    el("selfTrust").textContent = String(state.selfTrust);
+
+    const level = levelFromMomentum(state.momentum);
+    el("level").textContent = level;
+    el("lvlTag").textContent = level === "Building" ? "foundation" : "progress";
+
+    el("momBar").style.width = `${state.momentum}%`;
+    el("stBar").style.width = `${state.selfTrust}%`;
+
+    // lists
+    renderList("coreList", CORE);
+    renderList("bonusList", BONUS);
+
+    // checks
+    [...CORE, ...BONUS].forEach(item => {
+      const c = el(`chk_${item.id}`);
+      if(!c) return;
+      c.classList.toggle("on", !!state.checked[item.id]);
+    });
+
+    // MVD
+    el("mvdCheck").classList.toggle("on", !!state.mvd);
+    el("mvdRow").onclick = () => {
+      state.mvd = !state.mvd;
+      updateMetricsFromToday();
+      saveState();
+      render();
+    };
+    // add check svg to MVD checkbox
+    if(!el("mvdCheck").innerHTML.trim()){
+      el("mvdCheck").innerHTML = `
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+          <path d="M20 6L9 17l-5-5" stroke="rgba(134,239,172,0.95)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `;
+    }
+
+    // prompt
+    el("promptText").textContent = PROMPTS[state.promptIndex % PROMPTS.length];
+  }
+
+  // ---------- Events ----------
+  el("mainQuest").addEventListener("input", (e) => {
+    state.mainQuest = e.target.value;
+    saveState();
+  });
+
+  el("newPromptBtn").addEventListener("click", () => {
+    state.promptIndex = (state.promptIndex + 1) % PROMPTS.length;
+    saveState();
+    render();
+  });
+
+  el("resetBtn").addEventListener("click", () => {
+    // resets only today's toggles; keeps Momentum/Self-Trust values
+    state.checked = Object.fromEntries([...CORE, ...BONUS].map(x => [x.id, false]));
+    state.mvd = false;
+    saveState();
+    render();
+  });
+
+  // initial render
+  render();
+</script>
+</body>
+</html>
